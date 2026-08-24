@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+@import '@radix-ui/themes/styles.css';
+
+@layer base {
+  :root {
+    @apply font-sans;
+  }
+
+  body {
+    @apply m-0 min-h-screen min-w-[320px] bg-[var(--background)] text-[var(--foreground)];
+  }
+}
+
+@media (prefers-reduced-motion) {
+  *,
+  ::before,
+  ::after {
+    animation: none !important;
+  }
+}
