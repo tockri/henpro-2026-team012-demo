@@ -1,30 +1,40 @@
 import { Button, Checkbox } from '@radix-ui/themes'
-import { InfoCircledIcon } from '@radix-ui/react-icons'
+import { InfoCircledIcon, CheckIcon } from '@radix-ui/react-icons'
 import type { Phase, PhaseStatus } from './phases'
 
 type PhaseDotProps = {
   status: PhaseStatus
+  index: number
 }
 
-const PhaseDot: React.FC<PhaseDotProps> = ({ status }) => {
+const PhaseDot: React.FC<PhaseDotProps> = ({ status, index }) => {
+  if (status === 'done') {
+    return (
+      <div className="flex size-7 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-sm shadow-emerald-500/40">
+        <CheckIcon width={16} height={16} />
+      </div>
+    )
+  }
   if (status === 'current') {
     return (
-      <div className="flex size-5 items-center justify-center rounded-full border-2 border-blue-600 bg-white">
-        <div className="size-2.5 rounded-full bg-blue-600" />
+      <div className="relative flex size-7 items-center justify-center">
+        <span className="absolute inline-flex size-7 rounded-full bg-blue-500 animate-pulse-ring" />
+        <span className="relative flex size-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-md shadow-blue-500/50">
+          {index + 1}
+        </span>
       </div>
     )
   }
   return (
-    <div
-      className={
-        'size-4 rounded-full ' + (status === 'done' ? 'bg-slate-300' : 'bg-slate-500')
-      }
-    />
+    <div className="flex size-7 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-400 ring-1 ring-slate-200">
+      {index + 1}
+    </div>
   )
 }
 
 export type PhaseRowProps = {
   phase: Phase
+  index: number
   isFirst: boolean
   isLast: boolean
   onOpenNote: () => void
@@ -32,7 +42,7 @@ export type PhaseRowProps = {
 
 export const PhaseRow: React.FC<PhaseRowProps> = ({
   phase,
-  isFirst,
+  index,
   isLast,
   onOpenNote,
 }) => {
@@ -42,26 +52,22 @@ export const PhaseRow: React.FC<PhaseRowProps> = ({
   const titleColor = isDone
     ? 'text-slate-400'
     : isCurrent
-      ? 'text-slate-900 font-semibold'
-      : 'text-slate-800'
+      ? 'text-slate-900 font-bold'
+      : 'text-slate-700 font-medium'
 
-  // Connector line color: segments above the current dot are "done" (light),
-  // below are "todo" (dark).
-  const lineTop = isDone || isCurrent ? 'bg-slate-300' : 'bg-slate-500'
-  const lineBottom = isDone ? 'bg-slate-300' : 'bg-slate-500'
+  const lineColor = isDone ? 'bg-emerald-300' : 'bg-slate-200'
 
   return (
     <div className="relative flex gap-3">
       {/* Timeline rail */}
-      <div className="relative flex w-6 flex-none flex-col items-center">
-        <div className={'w-[3px] flex-none ' + (isFirst ? 'h-3 bg-transparent' : 'h-3 ' + lineTop)} />
-        <PhaseDot status={phase.status} />
-        <div className={'w-[3px] grow ' + (isLast ? 'bg-transparent' : lineBottom)} />
+      <div className="relative flex w-7 flex-none flex-col items-center">
+        <PhaseDot status={phase.status} index={index} />
+        {!isLast && <div className={'my-1 w-[3px] grow rounded-full ' + lineColor} />}
       </div>
 
       {/* Content */}
-      <div className="min-w-0 flex-1 pb-1">
-        <div className="flex min-h-9 items-center gap-2">
+      <div className={'min-w-0 flex-1 ' + (isLast ? 'pb-1' : 'pb-4')}>
+        <div className="flex min-h-7 items-center gap-2">
           <button
             type="button"
             onClick={onOpenNote}
@@ -69,31 +75,39 @@ export const PhaseRow: React.FC<PhaseRowProps> = ({
           >
             {phase.title}
           </button>
-          {isCurrent && (
-            <button
-              type="button"
-              onClick={onOpenNote}
-              aria-label="説明を表示"
-              className="text-blue-600"
-            >
-              <InfoCircledIcon width={18} height={18} />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={onOpenNote}
+            aria-label="説明を表示"
+            className={isCurrent ? 'text-blue-600' : 'text-slate-300'}
+          >
+            <InfoCircledIcon width={17} height={17} />
+          </button>
         </div>
 
         {/* Current phase task card */}
         {isCurrent && phase.tasks && (
-          <div className="mt-1 space-y-2 rounded-lg bg-white/70 p-3">
+          <div className="mt-2 space-y-2 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 p-3.5 ring-1 ring-blue-100 animate-fade-in">
             {phase.tasks.map((task) => (
               <div key={task.id} className="flex items-center gap-2">
                 <Checkbox checked={task.done} disabled color="green" />
-                <span className={task.done ? 'text-slate-800' : 'text-slate-600'}>
+                <span
+                  className={
+                    'text-sm ' +
+                    (task.done
+                      ? 'text-slate-400 line-through'
+                      : 'font-medium text-slate-700')
+                  }
+                >
                   {task.label}
                 </span>
               </div>
             ))}
             {phase.action && (
-              <Button size="2" className="mt-1 w-full" color="blue">
+              <Button
+                size="2"
+                className="mt-1 w-full !bg-gradient-to-r !from-blue-600 !to-indigo-600 !font-semibold shadow-md shadow-blue-500/30"
+              >
                 {phase.action.label}
               </Button>
             )}
