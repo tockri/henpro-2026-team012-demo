@@ -12,7 +12,8 @@ export type Phase = {
   status: PhaseStatus
   description: string
   tasks?: Task[]
-  action?: { label: string }
+  actions?: { label: string }[]
+  message?: string
 }
 
 export const PHASES: Phase[] = [
@@ -26,7 +27,8 @@ export const PHASES: Phase[] = [
     id: 'pre-docs',
     title: '必要書類の準備',
     status: 'done',
-    description: '本人確認書類や収入証明書など、仮審査に必要な書類をご準備いただきます。',
+    description:
+      '本人確認書類や収入証明書など、仮審査に必要な書類をご準備いただきます。',
   },
   {
     id: 'pre-review',
@@ -50,7 +52,6 @@ export const PHASES: Phase[] = [
       { id: 'reserve', label: 'ご来店Web予約', done: true },
       { id: 'meeting-date', label: '2026年8月20日 ご面談', done: false },
     ],
-    action: { label: '面談の予約を確認する' },
   },
   {
     id: 'main-apply',
@@ -63,6 +64,19 @@ export const PHASES: Phase[] = [
     title: '必要書類の準備',
     status: 'todo',
     description: '本審査に必要な書類をご準備いただきます。',
+    actions: [
+      { label: 'マイナンバーを提出' },
+      { label: '住民票を提出' },
+      { label: '保険証券を提出' },
+    ],
+  },
+  {
+    id: 'main-result',
+    title: '本審査結果連絡',
+    status: 'todo',
+    description: '本審査の結果をご連絡いたします。',
+    message:
+      'ただいま団信の申し込み中です。\n本審査の結果は2026年9月10日までにお知らせいたしますのでしばらくお待ちください。',
   },
   {
     id: 'contract',

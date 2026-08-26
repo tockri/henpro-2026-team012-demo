@@ -38,6 +38,7 @@ export type PhaseRowProps = {
   isFirst: boolean
   isLast: boolean
   onOpenNote: () => void
+  onAction: (label: string) => void
 }
 
 export const PhaseRow: React.FC<PhaseRowProps> = ({
@@ -45,6 +46,7 @@ export const PhaseRow: React.FC<PhaseRowProps> = ({
   index,
   isLast,
   onOpenNote,
+  onAction,
 }) => {
   const isCurrent = phase.status === 'current'
   const isDone = phase.status === 'done'
@@ -86,9 +88,14 @@ export const PhaseRow: React.FC<PhaseRowProps> = ({
         </div>
 
         {/* Current phase task card */}
-        {isCurrent && phase.tasks && (
+        {isCurrent && (phase.tasks || phase.actions || phase.message) && (
           <div className="mt-2 space-y-2 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 p-3.5 ring-1 ring-blue-100 animate-fade-in">
-            {phase.tasks.map((task) => (
+            {phase.message && (
+              <p className="whitespace-pre-line text-sm leading-relaxed text-slate-700">
+                {phase.message}
+              </p>
+            )}
+            {phase.tasks?.map((task) => (
               <div key={task.id} className="flex items-center gap-2">
                 <Checkbox checked={task.done} disabled color="green" />
                 <span
@@ -103,13 +110,19 @@ export const PhaseRow: React.FC<PhaseRowProps> = ({
                 </span>
               </div>
             ))}
-            {phase.action && (
-              <Button
-                size="2"
-                className="mt-1 w-full !bg-gradient-to-r !from-blue-600 !to-indigo-600 !font-semibold shadow-md shadow-blue-500/30"
-              >
-                {phase.action.label}
-              </Button>
+            {phase.actions && (
+              <div className="flex flex-col gap-2.5 pt-1">
+                {phase.actions.map((action) => (
+                  <Button
+                    key={action.label}
+                    size="3"
+                    onClick={() => onAction(action.label)}
+                    className="w-full !bg-gradient-to-r !from-blue-600 !to-indigo-600 !font-semibold shadow-md shadow-blue-500/30"
+                  >
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
             )}
           </div>
         )}
