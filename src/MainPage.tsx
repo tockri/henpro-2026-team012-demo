@@ -7,25 +7,55 @@ import { PhaseRow } from './PhaseRow'
 import { PhaseNote } from './PhaseNote'
 import { FileUploadPage } from './FileUploadPage'
 import { ChatPage } from './ChatPage'
+import { ReservationPage } from './ReservationPage'
+
+// このラベルのアクションだけ来店予約サイトへ遷移させる
+const RESERVATION_ACTION = 'ご来店Web予約'
 
 // デモ用: 現在のフェーズがこの順で自動的に切り替わる
-const DEMO_SEQUENCE = ['meeting', 'main-docs', 'main-result'] as const
+const DEMO_SEQUENCE = [
+  'meeting-reservation',
+  'meeting',
+  'main-docs',
+  'main-result',
+] as const
 const DEMO_INTERVAL_MS = 5000
+
+// ?mode=dev のときは開発モード: 自動切り替えを止め、SPACEキーで手動切り替え
+const isDevMode =
+  new URLSearchParams(window.location.search).get('mode') === 'dev'
 
 export const MainPage: React.FC = () => {
   const [openId, setOpenId] = useState<string | null>(null)
   const [demoStep, setDemoStep] = useState(0)
   const [uploadAction, setUploadAction] = useState<string | null>(null)
   const [chatOpen, setChatOpen] = useState(false)
+  const [reservationOpen, setReservationOpen] = useState(false)
 
-  // 5秒おきに現在フェーズを巡回させる（送信画面を開いている間は停止）
+  const advancePhase = () =>
+    setDemoStep((prev) => (prev + 1) % DEMO_SEQUENCE.length)
+
+  // 5秒おきに現在フェーズを巡回させる（送信画面を開いている間・devモードは停止）
   useEffect(() => {
-    if (uploadAction) return
-    const timer = setInterval(() => {
-      setDemoStep((prev) => (prev + 1) % DEMO_SEQUENCE.length)
-    }, DEMO_INTERVAL_MS)
+    if (uploadAction || reservationOpen || isDevMode) return
+    const timer = setInterval(advancePhase, DEMO_INTERVAL_MS)
     return () => clearInterval(timer)
-  }, [uploadAction])
+  }, [uploadAction, reservationOpen])
+
+  // devモード: SPACEキーで手動フェーズ切り替え
+  useEffect(() => {
+    if (!isDevMode) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code !== 'Space') return
+      // 入力欄にフォーカスがあるときは無視
+      const tag = (e.target as HTMLElement | null)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      e.preventDefault()
+      advancePhase()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   const currentId = DEMO_SEQUENCE[demoStep]
   const currentIndex = PHASES.findIndex((phase) => phase.id === currentId)
@@ -46,7 +76,7 @@ export const MainPage: React.FC = () => {
   const doneCount = phases.filter((phase) => phase.status === 'done').length
   const currentPhase = currentIndex >= 0 ? phases[currentIndex] : null
   const progress = Math.round(
-    ((doneCount + (currentPhase ? 0.5 : 0)) / phases.length) * 100,
+    ((doneCount + (currentPhase ? 0.5 : 0)) / phases.length) * 100
   )
 
   return (
@@ -90,7 +120,9 @@ export const MainPage: React.FC = () => {
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <span className="text-sm font-bold tabular-nums">{progress}%</span>
+            <span className="flex-none text-sm font-bold tabular-nums">
+              {currentIndex + 1} / {phases.length}ステップ
+            </span>
           </div>
         </div>
       </header>
@@ -106,7 +138,11 @@ export const MainPage: React.FC = () => {
               isFirst={i === 0}
               isLast={i === phases.length - 1}
               onOpenNote={() => setOpenId(phase.id)}
-              onAction={(label) => setUploadAction(label)}
+              onAction={(label) =>
+                label === RESERVATION_ACTION
+                  ? setReservationOpen(true)
+                  : setUploadAction(label)
+              }
             />
           ))}
         </div>
@@ -142,6 +178,11 @@ export const MainPage: React.FC = () => {
 
       {/* 外部チャットシステムへの遷移（デモ） */}
       {chatOpen && <ChatPage onBack={() => setChatOpen(false)} />}
+
+      {/* 来店予約Webへの遷移（デモ） */}
+      {reservationOpen && (
+        <ReservationPage onBack={() => setReservationOpen(false)} />
+      )}
     </div>
   )
 }

@@ -43,15 +43,19 @@ export const PHASES: Phase[] = [
     description: '仮審査の結果をご連絡いたします。',
   },
   {
-    id: 'meeting',
-    title: 'ご面談',
+    id: 'meeting-reservation',
+    title: '来店予約',
     status: 'current',
     description:
       'ご来店またはWebでの面談を予約し、担当者と今後の手続きについてご相談いただきます。',
-    tasks: [
-      { id: 'reserve', label: 'ご来店Web予約', done: true },
-      { id: 'meeting-date', label: '2026年8月20日 ご面談', done: false },
-    ],
+    actions: [{ label: 'ご来店Web予約' }],
+  },
+  {
+    id: 'meeting',
+    title: 'ご面談',
+    status: 'todo',
+    description: '担当者と今後の手続きについてご相談いただきます。',
+    tasks: [{ id: 'meeting-date', label: '2026年8月20日 ご面談', done: false }],
   },
   {
     id: 'main-apply',
