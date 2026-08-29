@@ -8,13 +8,13 @@ export type Task = {
 
 // アクション押下時の遷移先。fileUpload は対象書類名を必須で持つ。
 export type ActionTarget =
-  | { kind: 'reservation' }
-  | { kind: 'fileUpload'; actionName: string }
+  { kind: 'reservation' } | { kind: 'fileUpload'; actionName: string }
 
 // アクションボタン。to で押下時の遷移先ページを表す。
 export type PhaseAction = {
   label: string
   to: ActionTarget
+  goNextDemoStep?: boolean // デモ用: 押下時に demoStep を進めるか
 }
 
 // ソースデータの定義（status は持たない。現在フェーズから導出する）
@@ -57,7 +57,13 @@ export const PHASES: PhaseDef[] = [
     title: '来店予約',
     description:
       'ご来店またはWebでの面談を予約し、担当者と今後の手続きについてご相談いただきます。',
-    actions: [{ label: 'ご来店Web予約', to: { kind: 'reservation' } }],
+    actions: [
+      {
+        label: 'ご来店Web予約',
+        to: { kind: 'reservation' },
+        goNextDemoStep: true,
+      },
+    ],
   },
   {
     id: 'meeting',
@@ -75,9 +81,18 @@ export const PHASES: PhaseDef[] = [
     title: '必要書類の準備',
     description: '本審査に必要な書類をご準備いただきます。',
     actions: [
-      { label: '運転免許証を提出', to: { kind: 'fileUpload', actionName: '運転免許証' } },
-      { label: '所得証明書を提出', to: { kind: 'fileUpload', actionName: '所得証明書' } },
-      { label: '住民票を提出', to: { kind: 'fileUpload', actionName: '住民票' } },
+      {
+        label: '運転免許証を提出',
+        to: { kind: 'fileUpload', actionName: '運転免許証' },
+      },
+      {
+        label: '所得証明書を提出',
+        to: { kind: 'fileUpload', actionName: '所得証明書' },
+      },
+      {
+        label: '住民票を提出',
+        to: { kind: 'fileUpload', actionName: '住民票' },
+      },
     ],
   },
   {
