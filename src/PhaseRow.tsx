@@ -1,6 +1,6 @@
 import { Button, Checkbox } from '@radix-ui/themes'
 import { InfoCircledIcon, CheckIcon } from '@radix-ui/react-icons'
-import type { Phase, PhaseStatus } from './phases'
+import type { Phase, PhaseStatus, PhaseAction } from './phases'
 
 type PhaseDotProps = {
   status: PhaseStatus
@@ -38,8 +38,17 @@ export type PhaseRowProps = {
   isFirst: boolean
   isLast: boolean
   onOpenNote: () => void
-  onAction: (label: string) => void
+  onAction: (action: PhaseAction) => void
+  uploadedActionNames: string[]
 }
+
+// アップロード済みなら true（fileUpload 以外は常に false）
+const isActionUploaded = (
+  action: PhaseAction,
+  uploadedActionNames: string[],
+): boolean =>
+  action.to.kind === 'fileUpload' &&
+  uploadedActionNames.includes(action.to.actionName)
 
 export const PhaseRow: React.FC<PhaseRowProps> = ({
   phase,
@@ -47,6 +56,7 @@ export const PhaseRow: React.FC<PhaseRowProps> = ({
   isLast,
   onOpenNote,
   onAction,
+  uploadedActionNames,
 }) => {
   const isCurrent = phase.status === 'current'
   const isDone = phase.status === 'done'
@@ -112,16 +122,20 @@ export const PhaseRow: React.FC<PhaseRowProps> = ({
             ))}
             {phase.actions && (
               <div className="flex flex-col gap-2.5 pt-1">
-                {phase.actions.map((action) => (
-                  <Button
-                    key={action.label}
-                    size="3"
-                    onClick={() => onAction(action.label)}
-                    className="w-full !bg-gradient-to-r !from-blue-600 !to-indigo-600 !font-semibold shadow-md shadow-blue-500/30"
-                  >
-                    {action.label}
-                  </Button>
-                ))}
+                {phase.actions.map((action) => {
+                  const uploaded = isActionUploaded(action, uploadedActionNames)
+                  return (
+                    <Button
+                      key={action.label}
+                      size="3"
+                      disabled={uploaded}
+                      onClick={() => onAction(action)}
+                      className="w-full !bg-gradient-to-r !from-blue-600 !to-indigo-600 !font-semibold shadow-md shadow-blue-500/30 disabled:!opacity-50"
+                    >
+                      {uploaded ? `${action.label}（提出済み）` : action.label}
+                    </Button>
+                  )
+                })}
               </div>
             )}
           </div>

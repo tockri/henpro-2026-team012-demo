@@ -13,7 +13,8 @@
     "@radix-ui/themes": "^3.3.0",
     "bun-plugin-tailwind": "^0.1.2",
     "react": "^19",
-    "react-dom": "^19"
+    "react-dom": "^19",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@types/bun": "latest",

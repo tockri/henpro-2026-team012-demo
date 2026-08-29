@@ -1,24 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Avatar } from '@radix-ui/themes'
 import { HomeIcon, ChatBubbleIcon } from '@radix-ui/react-icons'
-import { PHASES } from './phases'
-import type { Phase } from './phases'
+import {
+  currentPhaseId,
+  derivePhases,
+  calcProgress,
+  calcUnreadCount,
+} from './phases'
 import { PhaseRow } from './PhaseRow'
 import { PhaseNote } from './PhaseNote'
 import { FileUploadPage } from './FileUploadPage'
 import { ChatPage } from './ChatPage'
 import { ReservationPage } from './ReservationPage'
+import { useAppStore } from './store/appStore'
 
-// このラベルのアクションだけ来店予約サイトへ遷移させる
-const RESERVATION_ACTION = 'ご来店Web予約'
-
-// デモ用: 現在のフェーズがこの順で自動的に切り替わる
-const DEMO_SEQUENCE = [
-  'meeting-reservation',
-  'meeting',
-  'main-docs',
-  'main-result',
-] as const
 const DEMO_INTERVAL_MS = 5000
 
 // ?mode=dev のときは開発モード: 自動切り替えを止め、SPACEキーで手動切り替え
@@ -26,21 +21,24 @@ const isDevMode =
   new URLSearchParams(window.location.search).get('mode') === 'dev'
 
 export const MainPage: React.FC = () => {
-  const [openId, setOpenId] = useState<string | null>(null)
-  const [demoStep, setDemoStep] = useState(0)
-  const [uploadAction, setUploadAction] = useState<string | null>(null)
-  const [chatOpen, setChatOpen] = useState(false)
-  const [reservationOpen, setReservationOpen] = useState(false)
+  const demoStep = useAppStore((s) => s.demoStep)
+  const advancePhase = useAppStore((s) => s.advancePhase)
+  const screen = useAppStore((s) => s.screen)
+  const showNote = useAppStore((s) => s.showNote)
+  const closeNote = useAppStore((s) => s.closeNote)
+  const openNotePhaseId = useAppStore((s) => s.openNotePhaseId)
+  const runAction = useAppStore((s) => s.runAction)
+  const openChat = useAppStore((s) => s.openChat)
+  const backToMain = useAppStore((s) => s.backToMain)
+  const uploadedActionNames = useAppStore((s) => s.uploadedActionNames)
+  const markUploaded = useAppStore((s) => s.markUploaded)
 
-  const advancePhase = () =>
-    setDemoStep((prev) => (prev + 1) % DEMO_SEQUENCE.length)
-
-  // 5秒おきに現在フェーズを巡回させる（送信画面を開いている間・devモードは停止）
+  // 5秒おきに現在フェーズを巡回させる（別画面表示中・devモードは停止）
   useEffect(() => {
-    if (uploadAction || reservationOpen || isDevMode) return
+    if (screen.kind !== 'main' || isDevMode) return
     const timer = setInterval(advancePhase, DEMO_INTERVAL_MS)
     return () => clearInterval(timer)
-  }, [uploadAction, reservationOpen])
+  }, [screen.kind, advancePhase])
 
   // devモード: SPACEキーで手動フェーズ切り替え
   useEffect(() => {
@@ -55,29 +53,17 @@ export const MainPage: React.FC = () => {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [advancePhase])
 
-  const currentId = DEMO_SEQUENCE[demoStep]
-  const currentIndex = PHASES.findIndex((phase) => phase.id === currentId)
-
-  // 現在フェーズを起点に、各フェーズの状態を導出する
-  const phases: Phase[] = PHASES.map((phase, i) => ({
-    ...phase,
-    status: i < currentIndex ? 'done' : i === currentIndex ? 'current' : 'todo',
-  }))
-
-  // 特定フェーズで未読チャットがある想定（デモ）
-  const unreadCount =
-    currentId === 'main-docs' || currentId === 'main-result' ? 1 : 0
-  const hasUnread = unreadCount > 0
-
-  const openPhase = phases.find((phase) => phase.id === openId) ?? null
-
-  const doneCount = phases.filter((phase) => phase.status === 'done').length
+  // --- ここから下はすべて状態からの導出（純粋関数） ---
+  const currentId = currentPhaseId(demoStep)
+  const phases = derivePhases(currentId)
+  const currentIndex = phases.findIndex((p) => p.id === currentId)
   const currentPhase = currentIndex >= 0 ? phases[currentIndex] : null
-  const progress = Math.round(
-    ((doneCount + (currentPhase ? 0.5 : 0)) / phases.length) * 100
-  )
+  const progress = calcProgress(phases)
+  const unreadCount = calcUnreadCount(currentId)
+  const hasUnread = unreadCount > 0
+  const openPhase = phases.find((p) => p.id === openNotePhaseId) ?? null
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-slate-50">
@@ -137,12 +123,9 @@ export const MainPage: React.FC = () => {
               index={i}
               isFirst={i === 0}
               isLast={i === phases.length - 1}
-              onOpenNote={() => setOpenId(phase.id)}
-              onAction={(label) =>
-                label === RESERVATION_ACTION
-                  ? setReservationOpen(true)
-                  : setUploadAction(label)
-              }
+              onOpenNote={() => showNote(phase.id)}
+              onAction={runAction}
+              uploadedActionNames={uploadedActionNames}
             />
           ))}
         </div>
@@ -151,7 +134,7 @@ export const MainPage: React.FC = () => {
       {/* 担当者に連絡（sticky） */}
       <button
         type="button"
-        onClick={() => setChatOpen(true)}
+        onClick={openChat}
         className="fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3.5 font-semibold text-white shadow-lg shadow-indigo-900/30 transition active:scale-95"
       >
         <ChatBubbleIcon width={20} height={20} />
@@ -164,25 +147,22 @@ export const MainPage: React.FC = () => {
       </button>
 
       {/* Description overlay */}
-      {openPhase && (
-        <PhaseNote phase={openPhase} onClose={() => setOpenId(null)} />
-      )}
+      {openPhase && <PhaseNote phase={openPhase} onClose={closeNote} />}
 
       {/* 外部ファイル送信サービスへの遷移（デモ） */}
-      {uploadAction && (
+      {screen.kind === 'fileUpload' && (
         <FileUploadPage
-          actionLabel={uploadAction}
-          onBack={() => setUploadAction(null)}
+          actionLabel={screen.actionLabel}
+          onBack={backToMain}
+          onUploaded={() => markUploaded(screen.actionLabel)}
         />
       )}
 
       {/* 外部チャットシステムへの遷移（デモ） */}
-      {chatOpen && <ChatPage onBack={() => setChatOpen(false)} />}
+      {screen.kind === 'chat' && <ChatPage onBack={backToMain} />}
 
       {/* 来店予約Webへの遷移（デモ） */}
-      {reservationOpen && (
-        <ReservationPage onBack={() => setReservationOpen(false)} />
-      )}
+      {screen.kind === 'reservation' && <ReservationPage onBack={backToMain} />}
     </div>
   )
 }

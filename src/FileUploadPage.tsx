@@ -9,9 +9,11 @@ import {
 } from '@radix-ui/react-icons'
 
 export type FileUploadPageProps = {
-  /** 提出する書類名（ボタンのラベル）。例: 「マイナンバーを提出」 */
+  /** 提出する書類名（actionName）。例: 「運転免許証」 */
   actionLabel: string
   onBack: () => void
+  /** 送信が完了したときに呼ばれる */
+  onUploaded: () => void
 }
 
 const SERVICE_URL = 'secure-file-transfer.example.com'
@@ -19,6 +21,7 @@ const SERVICE_URL = 'secure-file-transfer.example.com'
 export const FileUploadPage: React.FC<FileUploadPageProps> = ({
   actionLabel,
   onBack,
+  onUploaded,
 }) => {
   const [uploaded, setUploaded] = useState(false)
   const [sent, setSent] = useState(false)
@@ -112,7 +115,10 @@ export const FileUploadPage: React.FC<FileUploadPageProps> = ({
             <Button
               size="3"
               disabled={!uploaded}
-              onClick={() => setSent(true)}
+              onClick={() => {
+                setSent(true)
+                onUploaded()
+              }}
               className="mt-6 w-full !bg-gradient-to-r !from-blue-600 !to-indigo-600 !font-semibold shadow-md shadow-blue-500/30 disabled:!opacity-40"
             >
               この内容で送信する
