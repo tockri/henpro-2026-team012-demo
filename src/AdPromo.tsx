@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Cross2Icon, CheckIcon, ChevronRightIcon } from '@radix-ui/react-icons'
 
 // 住宅ローン以外の商品もおすすめするための広告枠。
@@ -37,9 +38,11 @@ export const AdPromo: React.FC<AdPromoProps> = ({ onReserve }) => {
       </button>
 
       {/* 全画面オーバーレイ広告（おすすめ訴求。説明のPhaseNoteとは別デザイン） */}
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm animate-fade-in"
+      {/* main の stacking context を抜けるため body 直下に portal する */}
+      {open &&
+        createPortal(
+          <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm animate-fade-in"
           onClick={() => setOpen(false)}
           role="dialog"
           aria-modal="true"
@@ -113,8 +116,9 @@ export const AdPromo: React.FC<AdPromoProps> = ({ onReserve }) => {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </>
   )
 }
