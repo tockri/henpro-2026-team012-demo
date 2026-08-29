@@ -130,7 +130,12 @@ export const PhaseRow: React.FC<PhaseRowProps> = ({
                       size="3"
                       disabled={uploaded}
                       onClick={() => onAction(action)}
-                      className="w-full !bg-gradient-to-r !from-blue-600 !to-indigo-600 !font-semibold shadow-md shadow-blue-500/30 disabled:!opacity-50"
+                      className={
+                        'w-full !font-semibold ' +
+                        (uploaded
+                          ? '!bg-emerald-100 !text-emerald-700 disabled:!opacity-100'
+                          : '!bg-gradient-to-r !from-blue-600 !to-indigo-600 !text-white shadow-md shadow-blue-500/30')
+                      }
                     >
                       {uploaded ? `${action.label}（提出済み）` : action.label}
                     </Button>
