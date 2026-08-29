@@ -34,31 +34,49 @@ type Day = {
 }
 
 const DAYS: Day[] = [
-  { label: '8/29(土)', tone: 'sat', closed: true },
-  { label: '8/30(日)', tone: 'sun', closed: true },
+  { label: '8/29(土)', tone: 'sat', closed: false },
+  { label: '8/30(日)', tone: 'sun', closed: false },
   { label: '8/31(月)', tone: 'weekday', closed: false },
-  { label: '9/1(火)', tone: 'weekday', closed: false },
-  { label: '9/2(水)', tone: 'weekday', closed: false },
+  { label: '9/1(火)', tone: 'weekday', closed: true },
+  { label: '9/2(水)', tone: 'weekday', closed: true },
   { label: '9/3(木)', tone: 'weekday', closed: false },
   { label: '9/4(金)', tone: 'weekday', closed: false },
 ]
 
 const TIMES = [
-  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
-  '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+  '10:00',
+  '10:30',
+  '11:00',
+  '11:30',
+  '12:00',
+  '12:30',
+  '13:00',
+  '13:30',
+  '14:00',
+  '14:30',
+  '15:00',
+  '15:30',
+  '16:00',
+  '16:30',
 ]
 
 // 受付中（◯）のスロット
 const OPEN_SLOTS: Record<string, string[]> = {
-  '9/3(木)': ['15:00', '15:30', '16:00'],
-  '9/4(金)': ['13:30', '14:00', '14:30', '15:00'],
+  '8/30(日)': ['15:00', '15:30', '16:00'],
+  '8/31(月)': ['13:30', '14:00', '14:30', '15:00'],
 }
 
 const dayTextColor = (tone: Day['tone']): string =>
-  tone === 'sat' ? 'text-sky-500' : tone === 'sun' ? 'text-rose-500' : 'text-slate-700'
+  tone === 'sat'
+    ? 'text-sky-500'
+    : tone === 'sun'
+      ? 'text-rose-500'
+      : 'text-slate-700'
 
 // セクション見出し（水色の下線付き）
-const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const SectionTitle: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => (
   <h2 className="mt-6 border-b-2 border-sky-400 pb-1.5 text-base font-bold text-slate-800">
     {children}
   </h2>
@@ -66,9 +84,10 @@ const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 export const ReservationPage: React.FC<ReservationPageProps> = ({ onBack }) => {
   const [topic, setTopic] = useState<string | null>(null)
-  const [completed, setCompleted] = useState<{ day: string; time: string } | null>(
-    null,
-  )
+  const [completed, setCompleted] = useState<{
+    day: string
+    time: string
+  } | null>(null)
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-100 animate-fade-in">
@@ -83,7 +102,11 @@ export const ReservationPage: React.FC<ReservationPageProps> = ({ onBack }) => {
           <ArrowLeftIcon width={18} height={18} />
         </button>
         <div className="flex min-w-0 flex-1 items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-slate-500">
-          <LockClosedIcon width={13} height={13} className="flex-none text-emerald-600" />
+          <LockClosedIcon
+            width={13}
+            height={13}
+            className="flex-none text-emerald-600"
+          />
           <span className="truncate text-xs">{SERVICE_URL}</span>
         </div>
       </div>
@@ -100,7 +123,9 @@ export const ReservationPage: React.FC<ReservationPageProps> = ({ onBack }) => {
         ) : (
           <div className="mx-auto w-full max-w-[520px] p-4">
             <div className="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
-              <p className="text-sm text-slate-600">以下の項目をご選択ください。</p>
+              <p className="text-sm text-slate-600">
+                以下の項目をご選択ください。
+              </p>
 
               {/* 店舗（選択済み） */}
               <SectionTitle>店舗を選択</SectionTitle>
@@ -229,7 +254,10 @@ const Calendar: React.FC<{
                   const open = OPEN_SLOTS[d.label]?.includes(time)
                   if (open) {
                     return (
-                      <td key={d.label} className="border border-slate-200 bg-white p-0">
+                      <td
+                        key={d.label}
+                        className="border border-slate-200 bg-white p-0"
+                      >
                         <button
                           type="button"
                           onClick={() => onPick(d.label, time)}
@@ -277,7 +305,9 @@ const CompleteView: React.FC<{
 }> = ({ topic, day, time, onBack }) => (
   <div className="mx-auto flex w-full max-w-[420px] flex-col items-center px-6 py-12 text-center">
     <CheckCircledIcon width={72} height={72} className="text-emerald-500" />
-    <h1 className="mt-5 text-xl font-bold text-slate-900">ご予約が完了しました</h1>
+    <h1 className="mt-5 text-xl font-bold text-slate-900">
+      ご予約が完了しました
+    </h1>
     <p className="mt-2 text-sm text-slate-500">
       ご登録のメールアドレスに予約の確認メールをお送りしました。
     </p>

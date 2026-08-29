@@ -12,6 +12,7 @@ import { PhaseNote } from './PhaseNote'
 import { FileUploadPage } from './FileUploadPage'
 import { ChatPage } from './ChatPage'
 import { ReservationPage } from './ReservationPage'
+import { AdPromo } from './AdPromo'
 import { useAppStore } from './store/appStore'
 
 const DEMO_INTERVAL_MS = 5000
@@ -67,9 +68,9 @@ export const MainPage: React.FC = () => {
   const openPhase = phases.find((p) => p.id === openNotePhaseId) ?? null
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-slate-50">
+    <div className="flex min-h-screen w-full flex-col bg-app">
       {/* Header */}
-      <header className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-blue-600 to-sky-500 px-5 pb-24 pt-5 text-white">
+      <header className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-blue-600 to-sky-500 px-5 pb-15 pt-5 text-white">
         {/* Decorative blobs */}
         <div className="pointer-events-none absolute -right-10 -top-16 size-48 rounded-full bg-white/10 blur-2xl" />
         <div className="pointer-events-none absolute -bottom-10 left-10 size-40 rounded-full bg-sky-300/20 blur-2xl" />
@@ -116,7 +117,13 @@ export const MainPage: React.FC = () => {
 
       {/* Timeline card */}
       <main className="relative z-10 -mt-16 mx-auto w-full max-w-[420px] flex-1 px-4 pb-10">
-        <div className="rounded-3xl bg-white p-5 shadow-xl shadow-indigo-900/10 ring-1 ring-black/5">
+        {currentPhase?.promo ? (
+          <AdPromo onReserve={openReservation} />
+        ) : (
+          <div className="mb-6 "></div>
+        )}
+
+        <div className="rounded-2xl bg-white p-5 shadow-xl shadow-indigo-900/10 ring-1 ring-black/5">
           {phases.map((phase, i) => (
             <PhaseRow
               key={phase.id}

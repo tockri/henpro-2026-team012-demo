@@ -1,6 +1,10 @@
 @import 'tailwindcss';
 @import '@radix-ui/themes/styles.css';
 
+@theme {
+  --color-app: #f0f0f0;
+}
+
 @layer base {
   :root {
     @apply font-sans;

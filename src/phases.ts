@@ -25,6 +25,7 @@ export type PhaseDef = {
   tasks?: Task[]
   actions?: PhaseAction[]
   message?: string
+  promo?: boolean
 }
 
 // 描画に使う Phase（導出した status 付き）
@@ -35,22 +36,26 @@ export const PHASES: PhaseDef[] = [
     id: 'pre-apply',
     title: '仮審査申し込み',
     description: '住宅ローンの仮審査をお申し込みいただく最初のステップです。',
+    promo: true,
   },
   {
     id: 'pre-docs',
     title: '必要書類の準備',
     description:
       '本人確認書類や収入証明書など、仮審査に必要な書類をご準備いただきます。',
+    promo: true,
   },
   {
     id: 'pre-review',
     title: '仮審査',
     description: '銀行がご提出内容をもとに仮審査を行います。',
+    promo: true,
   },
   {
     id: 'pre-result',
     title: '仮審査結果連絡',
     description: '仮審査の結果をご連絡いたします。',
+    promo: true,
   },
   {
     id: 'meeting-reservation',
@@ -64,12 +69,15 @@ export const PHASES: PhaseDef[] = [
         goNextDemoStep: true,
       },
     ],
+    promo: true,
   },
   {
     id: 'meeting',
     title: 'ご面談',
     description: '担当者と今後の手続きについてご相談いただきます。',
-    tasks: [{ id: 'meeting-date', label: '2026年8月20日 ご面談', done: false }],
+    message:
+      'ご面談は2026年8月20日 15:00に予約済みです。\nご来店お待ちしております。',
+    promo: true,
   },
   {
     id: 'main-apply',
