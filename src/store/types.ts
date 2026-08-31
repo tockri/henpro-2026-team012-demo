@@ -2,5 +2,6 @@
 export type Screen =
   | { kind: 'main' }
   | { kind: 'chat' }
-  | { kind: 'reservation' }
+  | { kind: 'reservation'; initialTopic?: string }
   | { kind: 'fileUpload'; actionLabel: string }
+  | { kind: 'loanPortal' }

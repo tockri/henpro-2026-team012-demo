@@ -8,7 +8,9 @@ export type Task = {
 
 // アクション押下時の遷移先。fileUpload は対象書類名を必須で持つ。
 export type ActionTarget =
-  { kind: 'reservation' } | { kind: 'fileUpload'; actionName: string }
+  | { kind: 'reservation' }
+  | { kind: 'fileUpload'; actionName: string }
+  | { kind: 'loanPortal' }
 
 // アクションボタン。to で押下時の遷移先ページを表す。
 export type PhaseAction = {
@@ -35,21 +37,14 @@ export const PHASES: PhaseDef[] = [
   {
     id: 'pre-apply',
     title: '仮審査申し込み',
-    description: '住宅ローンの仮審査をお申し込みいただく最初のステップです。',
+    description: '住宅ローンの仮審査をお申し込みいただく最初のステップです。「住宅ローンポータル」サイトからお申込みいただきます。',
     promo: true,
-  },
-  {
-    id: 'pre-docs',
-    title: '必要書類の準備',
-    description:
-      '本人確認書類や収入証明書など、仮審査に必要な書類をご準備いただきます。',
-    promo: true,
-  },
-  {
-    id: 'pre-review',
-    title: '仮審査',
-    description: '銀行がご提出内容をもとに仮審査を行います。',
-    promo: true,
+    actions: [
+      {
+        label: '住宅ローンポータルへ',
+        to: {kind: 'loanPortal'},
+      }
+    ]
   },
   {
     id: 'pre-result',
@@ -82,26 +77,7 @@ export const PHASES: PhaseDef[] = [
   {
     id: 'main-apply',
     title: '本審査申し込み',
-    description: '正式なローン契約に向けた本審査をお申し込みいただきます。',
-  },
-  {
-    id: 'main-docs',
-    title: '必要書類の準備',
-    description: '本審査に必要な書類をご準備いただきます。',
-    actions: [
-      {
-        label: '運転免許証を提出',
-        to: { kind: 'fileUpload', actionName: '運転免許証' },
-      },
-      {
-        label: '所得証明書を提出',
-        to: { kind: 'fileUpload', actionName: '所得証明書' },
-      },
-      {
-        label: '住民票を提出',
-        to: { kind: 'fileUpload', actionName: '住民票' },
-      },
-    ],
+    description: '「住宅ローンポータル」で、正式なローン契約に向けた本審査をお申し込みいただきます。',
   },
   {
     id: 'main-result',
@@ -129,9 +105,9 @@ export const PHASES: PhaseDef[] = [
 
 // デモ用: 現在のフェーズがこの順で切り替わる
 export const DEMO_SEQUENCE = [
+  'pre-apply',
   'meeting-reservation',
   'meeting',
-  'main-docs',
   'main-result',
 ] as const
 

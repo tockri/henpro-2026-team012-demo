@@ -9,6 +9,8 @@ import {
 
 export type ReservationPageProps = {
   onBack: () => void
+  // 遷移元で相談内容が決まっている場合は選択済みの状態で開く
+  initialTopic?: string
 }
 
 const SERVICE_URL = 'reserve.bank-lifeplan.example.jp'
@@ -82,8 +84,11 @@ const SectionTitle: React.FC<{ children: React.ReactNode }> = ({
   </h2>
 )
 
-export const ReservationPage: React.FC<ReservationPageProps> = ({ onBack }) => {
-  const [topic, setTopic] = useState<string | null>(null)
+export const ReservationPage: React.FC<ReservationPageProps> = ({
+  onBack,
+  initialTopic,
+}) => {
+  const [topic, setTopic] = useState<string | null>(initialTopic ?? null)
   const [completed, setCompleted] = useState<{
     day: string
     time: string

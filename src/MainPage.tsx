@@ -12,7 +12,9 @@ import { PhaseNote } from './PhaseNote'
 import { FileUploadPage } from './FileUploadPage'
 import { ChatPage } from './ChatPage'
 import { ReservationPage } from './ReservationPage'
+import { LoanPortalPage } from './LoanPortalPage'
 import { AdPromo } from './AdPromo'
+import { BudgetReview, BUDGET_REVIEW_TOPIC } from './BudgetReview'
 import { useAppStore } from './store/appStore'
 
 const DEMO_INTERVAL_MS = 5000
@@ -116,7 +118,7 @@ export const MainPage: React.FC = () => {
       </header>
 
       {/* Timeline card */}
-      <main className="relative z-10 -mt-16 mx-auto w-full max-w-[420px] flex-1 px-4 pb-10">
+      <main className="relative z-10 -mt-16 mx-auto w-full max-w-[420px] flex-1 px-4 pb-32">
         {currentPhase?.promo ? (
           <AdPromo onReserve={openReservation} />
         ) : (
@@ -137,6 +139,9 @@ export const MainPage: React.FC = () => {
             />
           ))}
         </div>
+
+        {/* 家計の見直し（任意導線） */}
+        <BudgetReview onReserve={() => openReservation(BUDGET_REVIEW_TOPIC)} />
       </main>
 
       {/* 来店予約・担当者に連絡（sticky） */}
@@ -144,7 +149,7 @@ export const MainPage: React.FC = () => {
         {/* 来店予約（常時表示） */}
         <button
           type="button"
-          onClick={openReservation}
+          onClick={() => openReservation()}
           className="flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-3.5 font-semibold text-white shadow-lg shadow-amber-900/30 transition active:scale-95"
         >
           <CalendarIcon width={20} height={20} />
@@ -183,7 +188,15 @@ export const MainPage: React.FC = () => {
       {screen.kind === 'chat' && <ChatPage onBack={backToMain} />}
 
       {/* 来店予約Webへの遷移（デモ） */}
-      {screen.kind === 'reservation' && <ReservationPage onBack={backToMain} />}
+      {screen.kind === 'reservation' && (
+        <ReservationPage
+          onBack={backToMain}
+          initialTopic={screen.initialTopic}
+        />
+      )}
+
+      {/* 住宅ローンポータル（仮審査申込）への遷移（デモ） */}
+      {screen.kind === 'loanPortal' && <LoanPortalPage onBack={backToMain} />}
     </div>
   )
 }
