@@ -7,6 +7,7 @@ export type NavigationSlice = {
   openReservation: (initialTopic?: string) => void
   openFileUpload: (actionLabel: string) => void
   openLoanPortal: () => void
+  openInsuranceCheck: () => void
   backToMain: () => void
 
   openNotePhaseId: string | null
@@ -31,6 +32,12 @@ export const createNavigationSlice: SliceCreator<NavigationSlice> = (set) => ({
     ),
   openLoanPortal: () =>
     set({ screen: { kind: 'loanPortal' } }, false, 'nav/openLoanPortal'),
+  openInsuranceCheck: () =>
+    set(
+      { screen: { kind: 'insuranceCheck' } },
+      false,
+      'nav/openInsuranceCheck'
+    ),
   backToMain: () => set({ screen: { kind: 'main' } }, false, 'nav/backToMain'),
 
   openNotePhaseId: null,

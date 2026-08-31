@@ -11,6 +11,7 @@ export type ActionTarget =
   | { kind: 'reservation' }
   | { kind: 'fileUpload'; actionName: string }
   | { kind: 'loanPortal' }
+  | { kind: 'insuranceCheck' }
 
 // アクションボタン。to で押下時の遷移先ページを表す。
 export type PhaseAction = {
@@ -28,6 +29,9 @@ export type PhaseDef = {
   actions?: PhaseAction[]
   message?: string
   promo?: boolean
+  budgetReview?: boolean
+  // この Phase を通過するまで非表示にする（対象 Phase の id）
+  revealAfter?: string
 }
 
 // 描画に使う Phase（導出した status 付き）
@@ -38,11 +42,13 @@ export const PHASES: PhaseDef[] = [
     id: 'pre-apply',
     title: '仮審査申し込み',
     description: '住宅ローンの仮審査をお申し込みいただく最初のステップです。「住宅ローンポータル」サイトからお申込みいただきます。',
-    promo: true,
+    promo: false,
+    budgetReview: true,
     actions: [
       {
         label: '住宅ローンポータルへ',
         to: {kind: 'loanPortal'},
+        goNextDemoStep: true,
       }
     ]
   },
@@ -50,7 +56,10 @@ export const PHASES: PhaseDef[] = [
     id: 'pre-result',
     title: '仮審査結果連絡',
     description: '仮審査の結果をご連絡いたします。',
-    promo: true,
+    promo: false,
+    budgetReview: true,
+    message:
+      'ただいま仮審査中です。\n審査の結果は2026年9月10日までにお知らせいたします。\nしばらくお待ちください。',
   },
   {
     id: 'meeting-reservation',
@@ -72,7 +81,32 @@ export const PHASES: PhaseDef[] = [
     description: '担当者と今後の手続きについてご相談いただきます。',
     message:
       'ご面談は2026年8月20日 15:00に予約済みです。\nご来店お待ちしております。',
-    promo: true,
+    promo: true,    
+  },
+  {
+    id: 'budget-review',
+    title: '家計見直し',
+    revealAfter: 'meeting',
+    description: 'ライフプランアドバイザーからの依頼により、書類アップロードをお願いいたします。',
+    actions: [
+      {
+        label: '生命保険確認サービス',
+        to: { kind: 'insuranceCheck' },
+      },
+      {
+        label: 'ご来店Web予約',
+        to: { kind: 'reservation' },
+        goNextDemoStep: true,
+      },
+    ]
+  },
+  {
+    id: 'meeting2',
+    title: '家計見直しのご面談',
+    revealAfter: 'meeting',
+    description: 'ライフプランアドバイザーが相談を承ります。',
+    message:
+      'ご面談は2026年8月25日 12:00に予約済みです。\nご来店お待ちしております。',
   },
   {
     id: 'main-apply',
@@ -106,8 +140,11 @@ export const PHASES: PhaseDef[] = [
 // デモ用: 現在のフェーズがこの順で切り替わる
 export const DEMO_SEQUENCE = [
   'pre-apply',
+  'pre-result',
   'meeting-reservation',
   'meeting',
+  'budget-review',
+  'meeting2',
   'main-result',
 ] as const
 
@@ -117,13 +154,26 @@ export const DEMO_SEQUENCE = [
 export const currentPhaseId = (demoStep: number): string =>
   DEMO_SEQUENCE[demoStep % DEMO_SEQUENCE.length] ?? DEMO_SEQUENCE[0]
 
-/** 現在 Phase を起点に、各 Phase の status を導出する */
+/** revealAfter で指定された Phase を通過済みかどうか */
+const isRevealed = (phase: PhaseDef, currentIndex: number): boolean => {
+  if (!phase.revealAfter) return true
+  const afterIndex = PHASES.findIndex((p) => p.id === phase.revealAfter)
+  return afterIndex >= 0 && currentIndex > afterIndex
+}
+
+/** 現在 Phase を起点に、各 Phase の status を導出する（未開放の Phase は除く） */
 export const derivePhases = (currentId: string): Phase[] => {
   const currentIndex = PHASES.findIndex((p) => p.id === currentId)
-  return PHASES.map((phase, i) => ({
-    ...phase,
-    status: i < currentIndex ? 'done' : i === currentIndex ? 'current' : 'todo',
-  }))
+  return PHASES.filter((phase) => isRevealed(phase, currentIndex)).map(
+    (phase) => {
+      const i = PHASES.indexOf(phase)
+      return {
+        ...phase,
+        status:
+          i < currentIndex ? 'done' : i === currentIndex ? 'current' : 'todo',
+      }
+    },
+  )
 }
 
 /** 進捗率（0-100）。current は 0.5 ステップとして扱う */
@@ -135,4 +185,4 @@ export const calcProgress = (phases: Phase[]): number => {
 
 /** 未読チャット件数（特定 Phase のときだけ 1 件、というデモ仕様） */
 export const calcUnreadCount = (currentId: string): number =>
-  currentId === 'main-docs' || currentId === 'main-result' ? 1 : 0
+  currentId === 'pre-result' || currentId === 'meeting2' || currentId === 'main-result' ? 1 : 0

@@ -1,6 +1,7 @@
 import { Button, Checkbox } from '@radix-ui/themes'
 import { InfoCircledIcon, CheckIcon } from '@radix-ui/react-icons'
 import type { Phase, PhaseStatus, PhaseAction } from './phases'
+import { INSURANCE_CHECK_NAME } from './InsuranceCheckPage'
 
 type PhaseDotProps = {
   status: PhaseStatus
@@ -42,13 +43,24 @@ export type PhaseRowProps = {
   uploadedActionNames: string[]
 }
 
-// アップロード済みなら true（fileUpload 以外は常に false）
-const isActionUploaded = (
+// 完了済みのアクションに表示するラベル。未完了・対象外のアクションは null。
+const doneLabelOf = (
   action: PhaseAction,
   uploadedActionNames: string[],
-): boolean =>
-  action.to.kind === 'fileUpload' &&
-  uploadedActionNames.includes(action.to.actionName)
+): string | null => {
+  switch (action.to.kind) {
+    case 'fileUpload':
+      return uploadedActionNames.includes(action.to.actionName)
+        ? `${action.label}（提出済み）`
+        : null
+    case 'insuranceCheck':
+      return uploadedActionNames.includes(INSURANCE_CHECK_NAME)
+        ? `${action.label}（確認済み）`
+        : null
+    default:
+      return null
+  }
+}
 
 export const PhaseRow: React.FC<PhaseRowProps> = ({
   phase,
@@ -123,21 +135,21 @@ export const PhaseRow: React.FC<PhaseRowProps> = ({
             {phase.actions && (
               <div className="flex flex-col gap-2.5 pt-1">
                 {phase.actions.map((action) => {
-                  const uploaded = isActionUploaded(action, uploadedActionNames)
+                  const doneLabel = doneLabelOf(action, uploadedActionNames)
                   return (
                     <Button
                       key={action.label}
                       size="3"
-                      disabled={uploaded}
+                      disabled={doneLabel !== null}
                       onClick={() => onAction(action)}
                       className={
                         'w-full !font-semibold ' +
-                        (uploaded
+                        (doneLabel !== null
                           ? '!bg-emerald-100 !text-emerald-700 disabled:!opacity-100'
                           : '!bg-gradient-to-r !from-blue-600 !to-indigo-600 !text-white shadow-md shadow-blue-500/30')
                       }
                     >
-                      {uploaded ? `${action.label}（提出済み）` : action.label}
+                      {doneLabel ?? action.label}
                     </Button>
                   )
                 })}

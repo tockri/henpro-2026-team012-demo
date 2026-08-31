@@ -5,3 +5,4 @@ export type Screen =
   | { kind: 'reservation'; initialTopic?: string }
   | { kind: 'fileUpload'; actionLabel: string }
   | { kind: 'loanPortal' }
+  | { kind: 'insuranceCheck' }

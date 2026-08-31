@@ -60,7 +60,7 @@ export const BudgetReview: React.FC<BudgetReviewProps> = ({ onReserve }) => {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="group mx-auto mt-5 flex w-full max-w-[300px] items-center gap-3 rounded-2xl border border-dashed border-teal-300 bg-white/60 px-4 py-3 text-left transition active:scale-[0.99]"
+        className="group mt-7 mb-3 flex w-full items-center gap-3 rounded-2xl border border-dashed border-teal-300 bg-white px-4 py-3 text-left transition active:scale-[0.99]"
       >
         <span className="flex size-8 flex-none items-center justify-center rounded-xl bg-teal-50 text-teal-600">
           <BarChartIcon width={17} height={17} />

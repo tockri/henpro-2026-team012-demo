@@ -4,6 +4,7 @@ export type UploadSlice = {
   // アップロード済みの書類名（actionName）
   uploadedActionNames: string[]
   markUploaded: (actionName: string) => void
+  clearUploaded: () => void
 }
 
 export const createUploadSlice: SliceCreator<UploadSlice> = (set) => ({
@@ -17,4 +18,6 @@ export const createUploadSlice: SliceCreator<UploadSlice> = (set) => ({
       false,
       'upload/markUploaded'
     ),
+  clearUploaded: () =>
+    set({ uploadedActionNames: [] }, false, 'upload/clearUploaded'),
 })

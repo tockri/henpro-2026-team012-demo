@@ -13,6 +13,7 @@ import { FileUploadPage } from './FileUploadPage'
 import { ChatPage } from './ChatPage'
 import { ReservationPage } from './ReservationPage'
 import { LoanPortalPage } from './LoanPortalPage'
+import { InsuranceCheckPage, INSURANCE_CHECK_NAME } from './InsuranceCheckPage'
 import { AdPromo } from './AdPromo'
 import { BudgetReview, BUDGET_REVIEW_TOPIC } from './BudgetReview'
 import { useAppStore } from './store/appStore'
@@ -25,7 +26,7 @@ const isDevMode =
 
 export const MainPage: React.FC = () => {
   const demoStep = useAppStore((s) => s.demoStep)
-  const advancePhase = useAppStore((s) => s.advancePhase)
+  const advanceDemo = useAppStore((s) => s.advanceDemo)
   const screen = useAppStore((s) => s.screen)
   const showNote = useAppStore((s) => s.showNote)
   const closeNote = useAppStore((s) => s.closeNote)
@@ -40,9 +41,9 @@ export const MainPage: React.FC = () => {
   // 5秒おきに現在フェーズを巡回させる（別画面表示中・devモードは停止）
   useEffect(() => {
     if (screen.kind !== 'main' || isDevMode) return
-    const timer = setInterval(advancePhase, DEMO_INTERVAL_MS)
+    const timer = setInterval(advanceDemo, DEMO_INTERVAL_MS)
     return () => clearInterval(timer)
-  }, [screen.kind, advancePhase])
+  }, [screen.kind, advanceDemo])
 
   // devモード: SPACEキーで手動フェーズ切り替え
   useEffect(() => {
@@ -53,11 +54,11 @@ export const MainPage: React.FC = () => {
       const tag = (e.target as HTMLElement | null)?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
       e.preventDefault()
-      advancePhase()
+      advanceDemo()
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [advancePhase])
+  }, [advanceDemo])
 
   // --- ここから下はすべて状態からの導出（純粋関数） ---
   const currentId = currentPhaseId(demoStep)
@@ -118,9 +119,13 @@ export const MainPage: React.FC = () => {
       </header>
 
       {/* Timeline card */}
-      <main className="relative z-10 -mt-16 mx-auto w-full max-w-[420px] flex-1 px-4 pb-32">
+      <main className="relative z-10 -mt-16 mx-auto w-full max-w-[420px] flex-1 px-4 pb-10">
         {currentPhase?.promo ? (
           <AdPromo onReserve={openReservation} />
+        ) : currentPhase?.budgetReview ? (
+          <BudgetReview
+            onReserve={() => openReservation(BUDGET_REVIEW_TOPIC)}
+          />
         ) : (
           <div className="mb-6 "></div>
         )}
@@ -139,9 +144,6 @@ export const MainPage: React.FC = () => {
             />
           ))}
         </div>
-
-        {/* 家計の見直し（任意導線） */}
-        <BudgetReview onReserve={() => openReservation(BUDGET_REVIEW_TOPIC)} />
       </main>
 
       {/* 来店予約・担当者に連絡（sticky） */}
@@ -197,6 +199,14 @@ export const MainPage: React.FC = () => {
 
       {/* 住宅ローンポータル（仮審査申込）への遷移（デモ） */}
       {screen.kind === 'loanPortal' && <LoanPortalPage onBack={backToMain} />}
+
+      {/* 生命保険確認サービス（Life Plan Coach）への遷移（デモ） */}
+      {screen.kind === 'insuranceCheck' && (
+        <InsuranceCheckPage
+          onBack={backToMain}
+          onChecked={() => markUploaded(INSURANCE_CHECK_NAME)}
+        />
+      )}
     </div>
   )
 }
