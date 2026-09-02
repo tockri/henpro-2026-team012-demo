@@ -66,7 +66,8 @@ export const PHASES: PhaseDef[] = [
         goNextDemoStep: true,
       },
     ],
-    promo: true,
+    promo: false,
+    budgetReview: true
   },
   {
     id: 'meeting',
