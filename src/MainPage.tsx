@@ -17,6 +17,7 @@ import { InsuranceCheckPage, INSURANCE_CHECK_NAME } from './InsuranceCheckPage'
 import { AdPromo } from './AdPromo'
 import { BudgetReview, BUDGET_REVIEW_TOPIC } from './BudgetReview'
 import { useAppStore } from './store/appStore'
+import { AGENT, agentFullName } from './agent'
 
 const DEMO_INTERVAL_MS = 5000
 
@@ -119,7 +120,8 @@ export const MainPage: React.FC = () => {
       </header>
 
       {/* Timeline card */}
-      <main className="relative z-10 -mt-16 mx-auto w-full max-w-[420px] flex-1 px-4 pb-10">
+      {/* pb: 右下の固定ボタン群（実測148px）にリスト末尾が隠れないための余白 */}
+      <main className="relative z-10 -mt-16 mx-auto w-full max-w-[420px] flex-1 px-4 pb-40">
         {currentPhase?.promo ? (
           <AdPromo onReserve={openReservation} />
         ) : currentPhase?.budgetReview ? (
@@ -158,19 +160,36 @@ export const MainPage: React.FC = () => {
           来店予約
         </button>
 
-        {/* 担当者に連絡 */}
+        {/* 担当者カード：上段は担当者情報、下段がチャットへのアクション */}
         <button
           type="button"
           onClick={openChat}
-          className="relative flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-3.5 font-semibold text-white shadow-lg shadow-amber-900/30 transition active:scale-95"
+          className="flex min-w-[196px] items-center gap-3 rounded-2xl bg-indigo-100 px-3.5 py-2.5 text-left shadow-lg shadow-indigo-900/25 ring-1 ring-indigo-300 transition active:scale-95"
         >
-          <ChatBubbleIcon width={20} height={20} />
-          担当者に連絡
-          {hasUnread && (
-            <span className="absolute -right-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full border-2 border-white bg-rose-500 text-xs font-bold tabular-nums text-white shadow">
-              {unreadCount}
+          <span className="relative flex-none">
+            <span className="flex size-11 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 text-lg font-bold text-white">
+              {AGENT.initial}
             </span>
-          )}
+            {/* オンライン表示（ChatPageヘッダーと揃える） */}
+            <span className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-white bg-emerald-500" />
+            {hasUnread && (
+              <span className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full border-2 border-white bg-rose-500 text-xs font-bold tabular-nums text-white shadow">
+                {unreadCount}
+              </span>
+            )}
+          </span>
+          <span className="min-w-0">
+            <span className="block text-xs leading-tight text-indigo-600">
+              担当：
+              <span className="font-semibold text-indigo-900">
+                {agentFullName(AGENT)}
+              </span>
+            </span>
+            <span className="mt-1 flex items-center gap-1.5 text-sm font-bold leading-tight text-amber-700">
+              <ChatBubbleIcon width={16} height={16} />
+              チャットで連絡
+            </span>
+          </span>
         </button>
       </div>
 

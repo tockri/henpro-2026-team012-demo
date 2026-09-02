@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { AGENT, agentFullName } from './agent'
 import {
   ArrowLeftIcon,
   LockClosedIcon,
@@ -21,7 +22,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 1,
     from: 'agent',
-    text: 'お問い合わせありがとうございます。住宅ローン担当の佐藤です。ご質問をどうぞ。',
+    text: `お問い合わせありがとうございます。住宅ローン担当の${agentFullName(AGENT)}です。ご質問をどうぞ。`,
   },
 ]
 
@@ -71,13 +72,15 @@ export const ChatPage: React.FC<ChatPageProps> = ({ onBack }) => {
       {/* チャットヘッダー */}
       <div className="flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-blue-600 px-4 py-3 text-white">
         <div className="flex size-10 flex-none items-center justify-center rounded-full bg-white/20 font-bold backdrop-blur">
-          佐
+          {AGENT.initial}
         </div>
         <div className="min-w-0">
-          <p className="truncate font-bold leading-tight">住宅ローン サポート</p>
+          <p className="truncate font-bold leading-tight">
+            担当：{agentFullName(AGENT)}
+          </p>
           <p className="flex items-center gap-1 text-xs text-white/80">
             <span className="inline-block size-2 rounded-full bg-emerald-300" />
-            担当者 オンライン
+            住宅ローン サポート・オンライン
           </p>
         </div>
       </div>
