@@ -43,14 +43,7 @@ export const PHASES: PhaseDef[] = [
     title: '仮審査申し込み',
     description: '住宅ローンの仮審査をお申し込みいただく最初のステップです。「住宅ローンポータル」サイトからお申込みいただきます。',
     promo: false,
-    budgetReview: true,
-    actions: [
-      {
-        label: '住宅ローンポータルへ',
-        to: {kind: 'loanPortal'},
-        goNextDemoStep: true,
-      }
-    ]
+    budgetReview: true
   },
   {
     id: 'pre-result',
@@ -112,6 +105,13 @@ export const PHASES: PhaseDef[] = [
     id: 'main-apply',
     title: '本審査申し込み',
     description: '「住宅ローンポータル」で、正式なローン契約に向けた本審査をお申し込みいただきます。',
+    actions: [
+      {
+        label: '住宅ローンポータルへ',
+        to: {kind: 'loanPortal'},
+        goNextDemoStep: true,
+      }
+    ]
   },
   {
     id: 'main-result',
@@ -139,12 +139,12 @@ export const PHASES: PhaseDef[] = [
 
 // デモ用: 現在のフェーズがこの順で切り替わる
 export const DEMO_SEQUENCE = [
-  'pre-apply',
   'pre-result',
   'meeting-reservation',
   'meeting',
   'budget-review',
   'meeting2',
+  'main-apply',
   'main-result',
 ] as const
 

@@ -11,7 +11,7 @@ import {
   CheckIcon,
 } from '@radix-ui/react-icons'
 
-// 銀行の「住宅ローンポータル」（仮審査申込フォーム）を模した外部サイト画面。
+// 銀行の「住宅ローンポータル」（本審査申込フォーム）を模した外部サイト画面。
 // 住宅ローンナビ（indigo基調）とは別サービスであることが伝わるよう、
 // ポータル側は既存の銀行サイトらしい濃紺ブルー＋緑アクセントで構成する。
 
@@ -289,7 +289,7 @@ const FieldRow: React.FC<FieldRowProps> = ({
 const StepHeader: React.FC = () => (
   <div className="bg-[#1b5ea8] px-5 pb-8 pt-6 text-white">
     <div className="mx-auto w-full max-w-[420px]">
-      <p className="text-center text-2xl tracking-widest">仮審査申込</p>
+      <p className="text-center text-2xl tracking-widest">本審査申込</p>
 
       <div className="mt-5 flex items-end justify-between">
         {STEPS.map(({ label, Icon }, i) => (
